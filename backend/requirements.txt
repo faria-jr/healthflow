@@ -1,0 +1,30 @@
+# HealthFlow Backend Requirements
+# Install with: pip install -r requirements.txt
+
+# FastAPI & Server
+fastapi>=0.115.0
+uvicorn[standard]>=0.34.0
+
+# Data Validation
+pydantic>=2.10.0
+pydantic-settings>=2.7.0
+email-validator>=2.2.0
+
+# Database
+sqlalchemy[asyncio]>=2.0.0
+asyncpg>=0.30.0
+alembic>=1.14.0
+
+# HTTP Client
+httpx>=0.28.0
+
+# Security
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.0
+python-multipart>=0.0.20
+
+# Logging
+structlog>=24.4.0
+
+# Utilities
+python-dateutil>=2.9.0
