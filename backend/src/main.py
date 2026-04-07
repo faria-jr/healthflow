@@ -13,6 +13,9 @@ from interfaces.routers import (
     appointments_router,
     payments_router,
     reviews_router,
+    notifications_router,
+    chat_router,
+    lab_results_router,
 )
 
 settings = get_settings()
@@ -55,6 +58,9 @@ app.include_router(doctors_router, prefix="/api/v1")
 app.include_router(appointments_router, prefix="/api/v1")
 app.include_router(payments_router, prefix="/api/v1")
 app.include_router(reviews_router, prefix="/api/v1")
+app.include_router(notifications_router, prefix="/api/v1")
+app.include_router(chat_router, prefix="/api/v1")
+app.include_router(lab_results_router, prefix="/api/v1")
 
 
 @app.get("/health")
