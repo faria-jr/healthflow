@@ -1,0 +1,74 @@
+{
+  "verdict": "REPROVADO",
+  "blockers": 2,
+  "majors": 2,
+  "minors": 0,
+  "results": {
+    "Performance": {
+      "agent_name": "Performance",
+      "status": "completed",
+      "findings": [
+        {
+          "severity": "major",
+          "category": "n-plus-1",
+          "description": "Potential N+1 query in doctor_repository.py",
+          "location": "doctor_repository.py:list methods",
+          "suggestion": "Add eager loading with selectinload()"
+        },
+        {
+          "severity": "major",
+          "category": "n-plus-1",
+          "description": "Potential N+1 query in medical_record_repository.py",
+          "location": "medical_record_repository.py:list methods",
+          "suggestion": "Add eager loading with selectinload()"
+        }
+      ],
+      "execution_time": 0.0010068416595458984,
+      "error": null
+    },
+    "Bug Founder": {
+      "agent_name": "Bug Founder",
+      "status": "completed",
+      "findings": [],
+      "execution_time": 0.0011157989501953125,
+      "error": null
+    },
+    "Code Quality": {
+      "agent_name": "Code Quality",
+      "status": "completed",
+      "findings": [],
+      "execution_time": 0.0006914138793945312,
+      "error": null
+    },
+    "Security": {
+      "agent_name": "Security",
+      "status": "completed",
+      "findings": [
+        {
+          "severity": "blocker",
+          "category": "secrets",
+          "description": "Default secret value found in settings",
+          "location": "config/settings.py",
+          "suggestion": "Remove default value, require via environment"
+        }
+      ],
+      "execution_time": 0.0003790855407714844,
+      "error": null
+    },
+    "TDD": {
+      "agent_name": "TDD",
+      "status": "completed",
+      "findings": [
+        {
+          "severity": "blocker",
+          "category": "coverage",
+          "description": "Low test coverage: 5 tests for 31 source files",
+          "location": "backend/tests/",
+          "suggestion": "Add more unit and integration tests"
+        }
+      ],
+      "execution_time": 0.0027647018432617188,
+      "error": null
+    }
+  }
+}
