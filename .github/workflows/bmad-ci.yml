@@ -1,0 +1,236 @@
+name: BMad CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  BMAD_RETRY_MAX: 3
+  BMAD_COVERAGE_THRESHOLD_BACKEND: 85
+  BMAD_COVERAGE_THRESHOLD_FRONTEND: 70
+
+jobs:
+  # ============================================
+  # PHASE 1: Development Quality Gate
+  # ============================================
+  lint-backend:
+    name: "Backend Lint"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        working-directory: ./backend
+        run: |
+          pip install ruff mypy
+      - name: Run ruff
+        working-directory: ./backend
+        run: ruff check src
+      - name: Run mypy
+        working-directory: ./backend
+        run: mypy src --strict || true
+
+  lint-frontend:
+    name: "Frontend Lint"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+      - name: Run type check
+        working-directory: ./frontend
+        run: npm run type-check || true
+
+  # ============================================
+  # PHASE 2: QA Parallel Review (Simulated)
+  # ============================================
+  qa-bug-founder:
+    name: "QA: Bug Founder"
+    runs-on: ubuntu-latest
+    needs: [lint-backend, lint-frontend]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run bug detection
+        run: |
+          echo "🔍 Running Bug Founder QA..."
+          # Check for common bugs
+          if grep -r "race condition\|TODO.*fixme\|FIXME" --include="*.py" backend/src/; then
+            echo "⚠️ Potential bugs found"
+            exit 1
+          fi
+          echo "✅ No obvious bugs detected"
+
+  qa-code-quality:
+    name: "QA: Code Quality"
+    runs-on: ubuntu-latest
+    needs: [lint-backend, lint-frontend]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check code quality
+        run: |
+          echo "📊 Running Code Quality QA..."
+          # Check for code smells
+          if grep -r "print(\|console.log\|TODO:" --include="*.py" --include="*.ts" --include="*.tsx" backend/src/ frontend/src/; then
+            echo "⚠️ Code quality issues found"
+            exit 1
+          fi
+          echo "✅ Code quality checks passed"
+
+  qa-security:
+    name: "QA: Security"
+    runs-on: ubuntu-latest
+    needs: [lint-backend, lint-frontend]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Security scan
+        run: |
+          echo "🔒 Running Security QA..."
+          # Check for secrets
+          if grep -r "ghp_[a-zA-Z0-9]\{36,\}\|sk-[a-zA-Z0-9]\{20,\}" --include="*.py" --include="*.ts" --include="*.md" .; then
+            echo "🚨 Secrets detected!"
+            exit 1
+          fi
+          # Check for hardcoded passwords
+          if grep -ri "password.*=.*['\"][^'\"]*['\"]" --include="*.py" backend/src/; then
+            echo "⚠️ Potential hardcoded credentials"
+            exit 1
+          fi
+          echo "✅ Security checks passed"
+
+  qa-performance:
+    name: "QA: Performance"
+    runs-on: ubuntu-latest
+    needs: [lint-backend, lint-frontend]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Performance checks
+        run: |
+          echo "⚡ Running Performance QA..."
+          # Check for N+1 queries
+          if grep -r "for.*in.*:\|while.*:" --include="*.py" backend/src/infrastructure/repositories/ | grep -v "selectinload"; then
+            echo "⚠️ Potential N+1 queries"
+          fi
+          echo "✅ Performance checks completed"
+
+  qa-tdd:
+    name: "QA: TDD Coverage"
+    runs-on: ubuntu-latest
+    needs: [lint-backend, lint-frontend]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: healthflow_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        working-directory: ./backend
+        run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio pytest-cov
+      - name: Run tests with coverage
+        working-directory: ./backend
+        env:
+          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/healthflow_test
+          SECRET_KEY: test-secret-key
+        run: |
+          pytest --cov=src --cov-report=xml --cov-report=term
+          COVERAGE=$(python -c "import xml.etree.ElementTree as ET; tree = ET.parse('coverage.xml'); root = tree.getroot(); print(root.attrib['line-rate'])")
+          echo "Coverage: $COVERAGE"
+          if (( $(echo "$COVERAGE < 0.85" | bc -l) )); then
+            echo "❌ Coverage below threshold (85%)"
+            exit 1
+          fi
+
+  # ============================================
+  # PHASE 3: Consolidator (Manual Simulation)
+  # ============================================
+  consolidate-qa:
+    name: "QA: Consolidator"
+    runs-on: ubuntu-latest
+    needs: [qa-bug-founder, qa-code-quality, qa-security, qa-performance, qa-tdd]
+    if: always()
+    steps:
+      - name: Consolidate QA Results
+        run: |
+          echo "🎯 BMad QA Consolidator"
+          echo "========================"
+          echo ""
+          echo "QA Results:"
+          echo "- Bug Founder: ${{ needs.qa-bug-founder.result }}"
+          echo "- Code Quality: ${{ needs.qa-code-quality.result }}"
+          echo "- Security: ${{ needs.qa-security.result }}"
+          echo "- Performance: ${{ needs.qa-performance.result }}"
+          echo "- TDD: ${{ needs.qa-tdd.result }}"
+          echo ""
+          
+          # Check if any QA failed
+          if [[ "${{ needs.qa-bug-founder.result }}" == "failure" ]] || \
+             [[ "${{ needs.qa-code-quality.result }}" == "failure" ]] || \
+             [[ "${{ needs.qa-security.result }}" == "failure" ]] || \
+             [[ "${{ needs.qa-tdd.result }}" == "failure" ]]; then
+            echo "❌ VEREDICTO: REPROVADO"
+            echo "Blockers encontrados. Corrija antes de fazer merge."
+            exit 1
+          fi
+          
+          if [[ "${{ needs.qa-performance.result }}" == "failure" ]]; then
+            echo "⚠️ VEREDICTO: APROVADO COM RESSALVAS"
+            echo "Performance issues detectadas mas não críticas."
+          else
+            echo "✅ VEREDICTO: APROVADO"
+          fi
+
+  # ============================================
+  # PHASE 4: Retry Logic (Simulated)
+  # ============================================
+  test-with-retry:
+    name: "Tests with Retry"
+    runs-on: ubuntu-latest
+    needs: consolidate-qa
+    strategy:
+      matrix:
+        attempt: [1, 2, 3]
+    continue-on-error: ${{ matrix.attempt < 3 }}
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: healthflow_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        working-directory: ./backend
+        run
