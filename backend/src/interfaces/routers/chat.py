@@ -5,12 +5,11 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from application.services import ChatService
-from application.interfaces.repositories import ChatMessageRepository
+from application.services.chat_service import ChatService
 from domain.exceptions import ChatMessageNotFoundError, ValidationError
 from infrastructure.database.connection import get_db_context
-from infrastructure.repositories import SQLAlchemyChatMessageRepository
-from interfaces.schemas import ApiResponse
+from infrastructure.repositories.chat_repository import SQLAlchemyChatMessageRepository
+from interfaces.schemas.common import ApiResponse
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 

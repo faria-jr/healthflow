@@ -4,12 +4,11 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from application.services import ReviewService
-from application.interfaces.repositories import ReviewRepository
+from application.services.review_service import ReviewService
 from domain.exceptions import ReviewNotFoundError, ValidationError
 from infrastructure.database.connection import get_db_context
-from infrastructure.repositories import SQLAlchemyReviewRepository
-from interfaces.schemas import ApiResponse
+from infrastructure.repositories.review_repository import SQLAlchemyReviewRepository
+from interfaces.schemas.common import ApiResponse
 
 router = APIRouter(prefix="/reviews", tags=["reviews"])
 

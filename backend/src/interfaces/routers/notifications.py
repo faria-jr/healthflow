@@ -5,12 +5,11 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from application.services import NotificationService
-from application.interfaces.repositories import NotificationRepository
+from application.services.notification_service import NotificationService
 from domain.exceptions import NotificationNotFoundError, ValidationError
 from infrastructure.database.connection import get_db_context
-from infrastructure.repositories import SQLAlchemyNotificationRepository
-from interfaces.schemas import ApiResponse
+from infrastructure.repositories.notification_repository import SQLAlchemyNotificationRepository
+from interfaces.schemas.common import ApiResponse
 
 router = APIRouter(prefix="/notifications", tags=["notifications"])
 

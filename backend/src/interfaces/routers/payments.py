@@ -5,12 +5,11 @@ from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from application.services import PaymentService
-from application.interfaces.repositories import PaymentRepository
+from application.services.payment_service import PaymentService
 from domain.exceptions import PaymentNotFoundError, ValidationError
 from infrastructure.database.connection import get_db_context
-from infrastructure.repositories import SQLAlchemyPaymentRepository
-from interfaces.schemas import ApiResponse
+from infrastructure.repositories.payment_repository import SQLAlchemyPaymentRepository
+from interfaces.schemas.common import ApiResponse
 
 router = APIRouter(prefix="/payments", tags=["payments"])
 

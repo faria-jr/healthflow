@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from decimal import Decimal
 
-from domain.entities import Payment
+from domain.entities.payment import Payment
 from domain.exceptions import PaymentNotFoundError, ValidationError
 from application.interfaces.repositories import PaymentRepository
 

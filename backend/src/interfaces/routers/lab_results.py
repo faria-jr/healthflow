@@ -4,12 +4,11 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from application.services import LabResultService
-from application.interfaces.repositories import LabResultRepository
+from application.services.lab_result_service import LabResultService
 from domain.exceptions import LabResultNotFoundError, ValidationError
 from infrastructure.database.connection import get_db_context
-from infrastructure.repositories import SQLAlchemyLabResultRepository
-from interfaces.schemas import ApiResponse
+from infrastructure.repositories.lab_result_repository import SQLAlchemyLabResultRepository
+from interfaces.schemas.common import ApiResponse
 
 router = APIRouter(prefix="/lab-results", tags=["lab-results"])
 
