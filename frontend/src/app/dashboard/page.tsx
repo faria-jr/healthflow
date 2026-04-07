@@ -14,7 +14,10 @@ import Link from "next/link";
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
-  const patientId = 1; // TODO: Get from user context
+  
+  // TODO: In production, get patientId from user context/profile
+  // This should come from an API call to get patient by user_id
+  const patientId = user ? 1 : 0; // Placeholder until auth integration is complete
 
   const { data: appointments, isLoading } = usePatientAppointments(patientId);
   const updateStatus = useUpdateAppointmentStatus();

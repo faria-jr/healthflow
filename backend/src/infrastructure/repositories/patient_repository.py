@@ -4,10 +4,12 @@ from datetime import date
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import select, text
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from domain.entities import Patient
+from domain.exceptions import PatientAlreadyExistsError
 from application.interfaces.repositories import PatientRepository
 
 
@@ -18,8 +20,21 @@ class SQLAlchemyPatientRepository(PatientRepository):
         self._session = session
 
     async def create(self, patient: Patient) -> Patient:
-        """Create a new patient."""
+        """Create a new patient with atomic duplicate check."""
         from database.models import Patient as PatientModel
+
+        # Use serializable transaction
+        await self._session.execute(text("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE"))
+
+        # Lock potential duplicates
+        await self._session.execute(
+            select(PatientModel)
+            .where(
+                (PatientModel.cpf == patient.cpf) |
+                (PatientModel.email == patient.email)
+            )
+            .for_update()
+        )
 
         db_patient = PatientModel(
             user_id=patient.user_id,
@@ -35,8 +50,17 @@ class SQLAlchemyPatientRepository(PatientRepository):
             allergies=patient.allergies,
         )
         self._session.add(db_patient)
-        await self._session.flush()
-        await self._session.refresh(db_patient)
+        
+        try:
+            await self._session.flush()
+            await self._session.refresh(db_patient)
+        except IntegrityError as e:
+            await self._session.rollback()
+            if "uq_patients_cpf" in str(e):
+                raise PatientAlreadyExistsError(f"Patient with CPF {patient.cpf} already exists")
+            elif "uq_patients_email" in str(e):
+                raise PatientAlreadyExistsError(f"Patient with email {patient.email} already exists")
+            raise
 
         patient.id = db_patient.id
         return patient

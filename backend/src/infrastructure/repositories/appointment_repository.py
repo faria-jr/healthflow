@@ -3,11 +3,12 @@
 from datetime import datetime, timedelta
 from typing import Any
 
-from sqlalchemy import and_, or_, select
+from sqlalchemy import and_, or_, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from domain.entities import Appointment
+from domain.exceptions import AppointmentConflictError
 from application.interfaces.repositories import AppointmentRepository
 
 
@@ -38,6 +39,44 @@ class SQLAlchemyAppointmentRepository(AppointmentRepository):
         appointment.created_at = db_appointment.created_at
         appointment.updated_at = db_appointment.updated_at
         return appointment
+
+    async def create_with_conflict_check(self, appointment: Appointment) -> Appointment:
+        """Create appointment with atomic conflict check using SELECT FOR UPDATE.
+        
+        This method prevents race conditions by locking the doctor's appointments
+        before checking for conflicts.
+        
+        Raises:
+            AppointmentConflictError: If there's a scheduling conflict.
+        """
+        from database.models import Appointment as AppointmentModel
+
+        # Use serializable transaction for maximum safety
+        await self._session.execute(text("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE"))
+
+        # Lock existing appointments for this doctor
+        await self._session.execute(
+            select(AppointmentModel)
+            .where(AppointmentModel.doctor_id == appointment.doctor_id)
+            .where(AppointmentModel.status.in_(['scheduled', 'confirmed']))
+            .for_update()
+        )
+
+        # Check for conflicts
+        conflicts = await self.check_conflicts(
+            doctor_id=appointment.doctor_id,
+            scheduled_at=appointment.scheduled_at,
+            duration_minutes=appointment.duration_minutes,
+        )
+
+        if conflicts:
+            raise AppointmentConflictError(
+                f"Scheduling conflict detected with appointment(s): "
+                f"{', '.join(str(c.id) for c in conflicts)}"
+            )
+
+        # No conflicts, create appointment
+        return await self.create(appointment)
 
     async def get_by_id(self, appointment_id: int) -> Appointment | None:
         """Get appointment by ID."""
