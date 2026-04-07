@@ -200,3 +200,27 @@ class MedicalRecordRepository(ABC):
     ) -> list[MedicalRecord]:
         """List medical records by doctor."""
         pass
+
+
+class PaymentRepository(ABC):
+    """Payment repository interface."""
+
+    @abstractmethod
+    async def create(self, payment: Payment) -> Payment:
+        """Create a new payment."""
+        pass
+
+    @abstractmethod
+    async def get_by_id(self, payment_id: int) -> Payment | None:
+        """Get payment by ID."""
+        pass
+
+    @abstractmethod
+    async def get_by_appointment_id(self, appointment_id: int) -> Payment | None:
+        """Get payment by appointment ID."""
+        pass
+
+    @abstractmethod
+    async def update(self, payment: Payment) -> Payment:
+        """Update payment."""
+        pass
