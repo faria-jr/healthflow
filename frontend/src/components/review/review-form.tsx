@@ -71,7 +71,7 @@ export function ReviewForm({ doctorId, appointmentId, onSubmit }: ReviewFormProp
         <Checkbox
           id="anonymous"
           checked={isAnonymous}
-          onCheckedChange={(checked) => setIsAnonymous(checked as boolean)}
+          onCheckedChange={(checked: boolean) => setIsAnonymous(checked)}
         />
         <Label htmlFor="anonymous">Avaliar anonimamente</Label>
       </div>
