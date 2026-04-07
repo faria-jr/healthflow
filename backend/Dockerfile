@@ -2,9 +2,6 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# Set Python path to include src directory
-ENV PYTHONPATH=/app/src:$PYTHONPATH
-
 # Copy requirements first for better caching
 COPY requirements.txt .
 
@@ -19,6 +16,10 @@ COPY src/ ./src/
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 USER appuser
 
+# Set Python path to include src directory (after USER to ensure it's in env)
+ENV PYTHONPATH=/app/src
+
 EXPOSE 8000
 
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Use shell form to ensure PYTHONPATH is available
+CMD uvicorn src.main:app --host 0.0.0.0 --port 8000
