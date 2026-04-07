@@ -137,3 +137,24 @@ class ReviewAlreadyExistsError(ConflictError):
     """Review already exists for appointment."""
 
     pass
+
+
+# Notification exceptions
+class NotificationNotFoundError(NotFoundError):
+    """Notification not found."""
+
+    pass
+
+
+# Chat exceptions
+class ChatMessageNotFoundError(NotFoundError):
+    """Chat message not found."""
+
+    pass
+
+
+# Lab result exceptions
+class LabResultNotFoundError(NotFoundError):
+    """Lab result not found."""
+
+    pass
