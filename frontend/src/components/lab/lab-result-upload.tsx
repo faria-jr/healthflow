@@ -48,7 +48,7 @@ export function LabResultUpload({ patientId, onUpload }: LabResultUploadProps) {
         lab_name: labName,
         test_type: testType,
         result_summary: resultSummary,
-        file: selectedFile,
+        file: selectedFile || undefined,
       });
 
       // Reset form
