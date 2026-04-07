@@ -1,0 +1,14 @@
+# Docker Compose override for Mac M1/M2 (ARM64)
+# Usage: docker compose -f docker-compose.yml -f docker-compose.override.yml up
+
+services:
+  backend:
+    platform: linux/amd64
+    build:
+      args:
+        - DOCKER_DEFAULT_PLATFORM=linux/amd64
+    environment:
+      - DOCKER_DEFAULT_PLATFORM=linux/amd64
+  
+  frontend:
+    platform: linux/amd64
