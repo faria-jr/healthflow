@@ -224,3 +224,127 @@ class PaymentRepository(ABC):
     async def update(self, payment: Payment) -> Payment:
         """Update payment."""
         pass
+
+
+class ReviewRepository(ABC):
+    """Review repository interface."""
+
+    @abstractmethod
+    async def create(self, review: Review) -> Review:
+        """Create a new review."""
+        pass
+
+    @abstractmethod
+    async def get_by_id(self, review_id: int) -> Review | None:
+        """Get review by ID."""
+        pass
+
+    @abstractmethod
+    async def get_by_appointment_id(self, appointment_id: int) -> Review | None:
+        """Get review by appointment ID."""
+        pass
+
+    @abstractmethod
+    async def update(self, review: Review) -> Review:
+        """Update review."""
+        pass
+
+    @abstractmethod
+    async def list_by_doctor(
+        self,
+        doctor_id: int,
+        status: str | None = None,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> list[Review]:
+        """List reviews by doctor."""
+        pass
+
+
+class NotificationRepository(ABC):
+    """Notification repository interface."""
+
+    @abstractmethod
+    async def create(self, notification: Notification) -> Notification:
+        """Create a new notification."""
+        pass
+
+    @abstractmethod
+    async def get_by_id(self, notification_id: int) -> Notification | None:
+        """Get notification by ID."""
+        pass
+
+    @abstractmethod
+    async def update(self, notification: Notification) -> Notification:
+        """Update notification."""
+        pass
+
+    @abstractmethod
+    async def list_by_user(
+        self,
+        user_id: UUID,
+        status: str | None = None,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> list[Notification]:
+        """List notifications by user."""
+        pass
+
+
+class ChatMessageRepository(ABC):
+    """Chat message repository interface."""
+
+    @abstractmethod
+    async def create(self, message: ChatMessage) -> ChatMessage:
+        """Create a new chat message."""
+        pass
+
+    @abstractmethod
+    async def get_by_id(self, message_id: int) -> ChatMessage | None:
+        """Get message by ID."""
+        pass
+
+    @abstractmethod
+    async def update(self, message: ChatMessage) -> ChatMessage:
+        """Update message."""
+        pass
+
+    @abstractmethod
+    async def list_by_appointment(
+        self,
+        appointment_id: int,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> list[ChatMessage]:
+        """List messages by appointment."""
+        pass
+
+
+class LabResultRepository(ABC):
+    """Lab result repository interface."""
+
+    @abstractmethod
+    async def create(self, lab_result: LabResult) -> LabResult:
+        """Create a new lab result."""
+        pass
+
+    @abstractmethod
+    async def get_by_id(self, lab_result_id: int) -> LabResult | None:
+        """Get lab result by ID."""
+        pass
+
+    @abstractmethod
+    async def update(self, lab_result: LabResult) -> LabResult:
+        """Update lab result."""
+        pass
+
+    @abstractmethod
+    async def list_by_patient(
+        self,
+        patient_id: int,
+        status: str | None = None,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> list[LabResult]:
+        """List lab results by patient."""
+        pass
