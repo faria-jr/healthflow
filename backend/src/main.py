@@ -7,7 +7,13 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from config.settings import get_settings
 from interfaces.middleware.rate_limit import RateLimitMiddleware
-from interfaces.routers import patients_router, doctors_router, appointments_router
+from interfaces.routers import (
+    patients_router,
+    doctors_router,
+    appointments_router,
+    payments_router,
+    reviews_router,
+)
 
 settings = get_settings()
 
@@ -47,6 +53,8 @@ app.add_middleware(
 app.include_router(patients_router, prefix="/api/v1")
 app.include_router(doctors_router, prefix="/api/v1")
 app.include_router(appointments_router, prefix="/api/v1")
+app.include_router(payments_router, prefix="/api/v1")
+app.include_router(reviews_router, prefix="/api/v1")
 
 
 @app.get("/health")
