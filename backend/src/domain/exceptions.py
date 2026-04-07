@@ -111,3 +111,29 @@ class MedicalRecordAlreadyExistsError(ConflictError):
     """Medical record already exists for appointment."""
 
     pass
+
+
+# Payment exceptions
+class PaymentNotFoundError(NotFoundError):
+    """Payment not found."""
+
+    pass
+
+
+class PaymentAlreadyExistsError(ConflictError):
+    """Payment already exists for appointment."""
+
+    pass
+
+
+# Review exceptions
+class ReviewNotFoundError(NotFoundError):
+    """Review not found."""
+
+    pass
+
+
+class ReviewAlreadyExistsError(ConflictError):
+    """Review already exists for appointment."""
+
+    pass
