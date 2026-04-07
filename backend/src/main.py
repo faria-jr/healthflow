@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from config.settings import get_settings
+from interfaces.middleware.rate_limit import RateLimitMiddleware
 from interfaces.routers import patients_router, doctors_router, appointments_router
 
 settings = get_settings()
@@ -29,6 +30,9 @@ app = FastAPI(
     redoc_url="/redoc" if settings.debug else None,
     lifespan=lifespan,
 )
+
+# Rate limiting middleware
+app.add_middleware(RateLimitMiddleware, requests_per_minute=60)
 
 # CORS middleware
 app.add_middleware(

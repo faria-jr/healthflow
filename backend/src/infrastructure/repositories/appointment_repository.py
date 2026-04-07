@@ -5,6 +5,7 @@ from typing import Any
 
 from sqlalchemy import and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from domain.entities import Appointment
 from application.interfaces.repositories import AppointmentRepository
@@ -97,6 +98,12 @@ class SQLAlchemyAppointmentRepository(AppointmentRepository):
         if from_date:
             query = query.where(AppointmentModel.scheduled_at >= from_date)
 
+        # Add eager loading for patient and doctor to avoid N+1
+        query = query.options(
+            selectinload(AppointmentModel.patient),
+            selectinload(AppointmentModel.doctor),
+        )
+
         query = (
             query.order_by(AppointmentModel.scheduled_at.desc())
             .limit(limit)
@@ -130,6 +137,12 @@ class SQLAlchemyAppointmentRepository(AppointmentRepository):
 
         if to_date:
             query = query.where(AppointmentModel.scheduled_at <= to_date)
+
+        # Add eager loading for patient and doctor to avoid N+1
+        query = query.options(
+            selectinload(AppointmentModel.patient),
+            selectinload(AppointmentModel.doctor),
+        )
 
         query = (
             query.order_by(AppointmentModel.scheduled_at.desc())

@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     database_echo: bool = Field(default=False)
 
     # Security
-    secret_key: str = Field(default="change-me-in-production")
+    secret_key: str  # No default - must be provided via env
     algorithm: str = Field(default="HS256")
     access_token_expire_minutes: int = Field(default=30)
     refresh_token_expire_days: int = Field(default=7)
