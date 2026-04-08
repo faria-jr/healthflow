@@ -190,8 +190,8 @@ async def complete_appointment(
 )
 async def cancel_appointment(
     appointment_id: int,
-    reason: str | None = None,
     service: Annotated[AppointmentService, Depends(get_appointment_service)],
+    reason: str | None = None,
 ) -> ApiResponse[AppointmentResponse]:
     """Cancel appointment."""
     try:
@@ -239,8 +239,8 @@ async def add_notes(
 )
 async def list_patient_appointments(
     patient_id: int,
-    filters: AppointmentFilterRequest = Depends(),
     service: Annotated[AppointmentService, Depends(get_appointment_service)],
+    filters: AppointmentFilterRequest = Depends(),
 ) -> ApiResponse[AppointmentListResponse]:
     """List appointments for a patient."""
     appointments = await service.list_patient_appointments(
@@ -266,8 +266,8 @@ async def list_patient_appointments(
 )
 async def list_doctor_appointments(
     doctor_id: int,
-    filters: AppointmentFilterRequest = Depends(),
     service: Annotated[AppointmentService, Depends(get_appointment_service)],
+    filters: AppointmentFilterRequest = Depends(),
 ) -> ApiResponse[AppointmentListResponse]:
     """List appointments for a doctor."""
     appointments = await service.list_doctor_appointments(

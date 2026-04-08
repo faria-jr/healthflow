@@ -1,5 +1,7 @@
 """Database models for HealthFlow."""
 
+from sqlalchemy import text
+
 from .base import Base
 from .patient import Patient
 from .doctor import Doctor

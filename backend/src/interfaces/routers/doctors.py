@@ -150,8 +150,8 @@ async def update_current_doctor(
     description="List all doctors with optional filters.",
 )
 async def list_doctors(
-    filters: DoctorFilterRequest = Depends(),
     service: Annotated[DoctorService, Depends(get_doctor_service)],
+    filters: DoctorFilterRequest = Depends(),
 ) -> ApiResponse[DoctorListResponse]:
     """List doctors."""
     filter_dict = {}
@@ -181,9 +181,9 @@ async def list_doctors(
 )
 async def list_doctors_by_specialty(
     specialty: str,
+    service: Annotated[DoctorService, Depends(get_doctor_service)],
     limit: int = 100,
     offset: int = 0,
-    service: Annotated[DoctorService, Depends(get_doctor_service)],
 ) -> ApiResponse[DoctorListResponse]:
     """List doctors by specialty."""
     doctors = await service.list_doctors_by_specialty(specialty, limit, offset)

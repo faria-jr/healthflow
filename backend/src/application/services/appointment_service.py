@@ -248,7 +248,7 @@ class AppointmentService:
         offset: int = 0,
     ) -> list[Appointment]:
         """List appointments for a doctor.
-        
+
         Args:
             doctor_id: Doctor ID
             status: Optional status filter
@@ -256,3 +256,10 @@ class AppointmentService:
             to_date: Optional to date filter
             limit: Maximum number of results
             offset: Offset for pagination
+
+        Returns:
+            List of appointments
+        """
+        return await self._appointment_repo.list_by_doctor(
+            doctor_id, status, from_date, to_date, limit, offset
+        )
