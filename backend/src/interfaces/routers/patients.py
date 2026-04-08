@@ -196,10 +196,10 @@ async def remove_allergy(
     description="List all patients with optional filters.",
 )
 async def list_patients(
+    service: Annotated[PatientService, Depends(get_patient_service)],
     limit: int = 100,
     offset: int = 0,
     name: str | None = None,
-    service: Annotated[PatientService, Depends(get_patient_service)],
 ) -> ApiResponse[PatientListResponse]:
     """List patients."""
     filters = {}
